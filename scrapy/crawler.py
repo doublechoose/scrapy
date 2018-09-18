@@ -227,29 +227,34 @@ class CrawlerRunner(object):
 class CrawlerProcess(CrawlerRunner):
     """
     A class to run multiple scrapy crawlers in a process simultaneously.
-
+    在一个进程中同步的执行多个scrapy爬虫的类
     This class extends :class:`~scrapy.crawler.CrawlerRunner` by adding support
     for starting a Twisted `reactor`_ and handling shutdown signals, like the
     keyboard interrupt command Ctrl-C. It also configures top-level logging.
-
+    这个类继承class:`~scrapy.crawler.CrawlerRunner`，通过添加支持启动一个Twisted`reactor`
+    和处理shutdown信号，如键盘中断命令Ctrl-C.也可以配置顶级日志。
     This utility should be a better fit than
     :class:`~scrapy.crawler.CrawlerRunner` if you aren't running another
     Twisted `reactor`_ within your application.
-
+    这个公用类会比class:`~scrapy.crawler.CrawlerRunner`更适合，如果没有在你的应用中运行
+    其他Twisted `reactor`_ 。
     The CrawlerProcess object must be instantiated with a
     :class:`~scrapy.settings.Settings` object.
-
+    该对象必须传入:class:`~scrapy.settings.Settings` object 进行实例化。
     :param install_root_handler: whether to install root logging handler
         (default: True)
 
     This class shouldn't be needed (since Scrapy is responsible of using it
     accordingly) unless writing scripts that manually handle the crawling
     process. See :ref:`run-from-script` for an example.
+
     """
 
     def __init__(self, settings=None, install_root_handler=True):
         super(CrawlerProcess, self).__init__(settings)
+        # 安装shutdown处理机
         install_shutdown_handlers(self._signal_shutdown)
+        # 配置日志
         configure_logging(self.settings, install_root_handler)
         log_scrapy_info(self.settings)
 
@@ -269,6 +274,7 @@ class CrawlerProcess(CrawlerRunner):
 
     def start(self, stop_after_crawl=True):
         """
+        该方法启动一个reactor,调整他的池大小
         This method starts a Twisted `reactor`_, adjusts its pool size to
         :setting:`REACTOR_THREADPOOL_MAXSIZE`, and installs a DNS cache based
         on :setting:`DNSCACHE_ENABLED` and :setting:`DNSCACHE_SIZE`.

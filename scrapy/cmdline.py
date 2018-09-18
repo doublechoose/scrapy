@@ -94,7 +94,7 @@ def _run_print_help(parser, func, *a, **kw):
         if e.print_help:
             parser.print_help()
         sys.exit(2)
-
+# 执行
 def execute(argv=None, settings=None):
     if argv is None:
         argv = sys.argv
@@ -145,7 +145,7 @@ def execute(argv=None, settings=None):
     cmd.add_options(parser)
     opts, args = parser.parse_args(args=argv[1:])
     _run_print_help(parser, cmd.process_options, args, opts)
-
+    # 实例化CrawlerProcess
     cmd.crawler_process = CrawlerProcess(settings)
     _run_print_help(parser, _run_command, cmd, args, opts)
     sys.exit(cmd.exitcode)

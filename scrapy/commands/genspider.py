@@ -18,6 +18,7 @@ def sanitize_module_name(module_name):
     with one
     """
     module_name = module_name.replace('-', '_').replace('.', '_')
+    # 如果文件名开头不以字母开头，则添加前缀a
     if module_name[0] not in string.ascii_letters:
         module_name = "a" + module_name
     return module_name
@@ -59,14 +60,15 @@ class Command(ScrapyCommand):
             return
         if len(args) != 2:
             raise UsageError()
-
+        # 从命令行中得到name 和域
         name, domain = args[0:2]
+        # 对name进行调整
         module = sanitize_module_name(name)
 
         if self.settings.get('BOT_NAME') == module:
             print("Cannot create a spider with the same name as your project")
             return
-
+        # 载入spider
         try:
             spidercls = self.crawler_process.spider_loader.load(name)
         except KeyError:
@@ -107,7 +109,7 @@ class Command(ScrapyCommand):
             template_name), end=('' if spiders_module else '\n'))
         if spiders_module:
             print("in module:\n  %s.%s" % (spiders_module.__name__, module))
-
+    # 从template文件夹中找到模板
     def _find_template(self, template):
         template_file = join(self.templates_dir, '%s.tmpl' % template)
         if exists(template_file):

@@ -22,6 +22,7 @@ class Command(ScrapyCommand):
             help="also display twisted/python/platform info (useful for bug reports)")
 
     def run(self, args, opts):
+        # 如果带有verbose字段 则打印所有包版本
         if opts.verbose:
             versions = scrapy_components_versions()
             width = max(len(n) for (n, _) in versions)

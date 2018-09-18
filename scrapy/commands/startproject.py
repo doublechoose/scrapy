@@ -4,6 +4,7 @@ import os
 import string
 from importlib import import_module
 from os.path import join, exists, abspath
+# shutil 提供大量对文件和目录的高阶操作 属于python内部方法
 from shutil import ignore_patterns, move, copy2, copystat
 
 import scrapy
@@ -20,29 +21,34 @@ TEMPLATES_TO_RENDER = (
     ('${project_name}', 'middlewares.py.tmpl'),
 )
 
+# 忽略pyc、svn文件
 IGNORE = ignore_patterns('*.pyc', '.svn')
 
-
+# 继承ScrapyCommand类
 class Command(ScrapyCommand):
 
     requires_project = False
     default_settings = {'LOG_ENABLED': False,
                         'SPIDER_LOADER_WARN_ONLY': True}
-
+    # 语法
     def syntax(self):
         return "<project_name> [project_dir]"
-
+    # 作用
     def short_desc(self):
         return "Create new project"
 
     def _is_valid_name(self, project_name):
+        # 判断是否和某模块名字冲突
         def _module_exists(module_name):
             try:
+                # 可以导入模块，返回true
                 import_module(module_name)
                 return True
             except ImportError:
+                # 导入失败，返回false
                 return False
 
+        # 判断命名是否合规(字母开头，只包含字母、数字、下横线)
         if not re.search(r'^[_a-zA-Z]\w*$', project_name):
             print('Error: Project names must begin with a letter and contain'\
                     ' only\nletters, numbers and underscores')
@@ -62,22 +68,27 @@ class Command(ScrapyCommand):
         https://github.com/scrapy/scrapy/pull/2005
         """
         ignore = IGNORE
+        # 得到src文件夹中所有的文件名 是个list
         names = os.listdir(src)
+        # 得到列表中带有pyc、svn的文件
         ignored_names = ignore(src, names)
-
+        # 如果不存在，就创建一个文件夹
         if not os.path.exists(dst):
             os.makedirs(dst)
-
+        # 如果有要忽略的文件，则跳过
         for name in names:
             if name in ignored_names:
                 continue
 
             srcname = os.path.join(src, name)
             dstname = os.path.join(dst, name)
+            # 如果是文件夹，递归执行该方法
             if os.path.isdir(srcname):
                 self._copytree(srcname, dstname)
             else:
+                # 否则拷贝
                 copy2(srcname, dstname)
+        # 复制与文件关联的权限和日期。
         copystat(src, dst)
 
     def run(self, args, opts):
@@ -101,10 +112,12 @@ class Command(ScrapyCommand):
 
         self._copytree(self.templates_dir, abspath(project_dir))
         move(join(project_dir, 'module'), join(project_dir, project_name))
+        # 对
         for paths in TEMPLATES_TO_RENDER:
             path = join(*paths)
             tplfile = join(project_dir,
                 string.Template(path).substitute(project_name=project_name))
+            # 将模板文件渲染到文件夹中    
             render_templatefile(tplfile, project_name=project_name,
                 ProjectName=string_camelcase(project_name))
         print("New Scrapy project '%s', using template directory '%s', "

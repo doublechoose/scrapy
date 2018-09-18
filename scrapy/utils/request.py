@@ -14,30 +14,38 @@ from scrapy.utils.python import to_bytes, to_native_str
 from w3lib.url import canonicalize_url
 from scrapy.utils.httpobj import urlparse_cached
 
-
+# 使用了python的弱引用，保存指纹
 _fingerprint_cache = weakref.WeakKeyDictionary()
 def request_fingerprint(request, include_headers=None):
     """
     Return the request fingerprint.
+    返回请求的指纹
 
     The request fingerprint is a hash that uniquely identifies the resource the
     request points to. For example, take the following two urls:
+    请求指纹是一个哈希，唯一的标识请求指向的资源。比如下面2个url：
 
     http://www.example.com/query?id=111&cat=222
     http://www.example.com/query?cat=222&id=111
 
     Even though those are two different URLs both point to the same resource
     and are equivalent (ie. they should return the same response).
+    即使这些是2个不同的url同时指向相同的资源，并且是相等的。(他们应该返回同样的资源)
 
     Another example are cookies used to store session ids. Suppose the
     following page is only accesible to authenticated users:
+    另一些例子是cookies用来保存session id的。假设下面这页只能被认证的用户访问：
 
     http://www.example.com/members/offers.html
 
+    大量的网站使用cookie保存session id，添加一个随机组件给HTTP请求，因此这些在计算指纹
+    的时候应该被忽略
     Lot of sites use a cookie to store the session id, which adds a random
     component to the HTTP Request and thus should be ignored when calculating
     the fingerprint.
 
+    由于这个原因，当计算指纹的时候，请求头默认被忽略。如果你想包含指定头，使用include_headers
+    参数
     For this reason, request headers are ignored by default when calculating
     the fingeprint. If you want to include specific headers use the
     include_headers argument, which is a list of Request headers to include.

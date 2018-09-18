@@ -54,7 +54,9 @@ class Command(ScrapyCommand):
             raise UsageError("running 'scrapy crawl' with more than one spider is no longer supported")
         spname = args[0]
 
+        # 设置爬取
         self.crawler_process.crawl(spname, **opts.spargs)
+        # 开始爬
         self.crawler_process.start()
 
         if self.crawler_process.bootstrap_failed:
